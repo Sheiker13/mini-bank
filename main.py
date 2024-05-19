@@ -5,22 +5,25 @@ account = {'full_name': '', 'age': 0, 'password': '', 'balance': 0, 'treshold': 
 def log_error(err_msg):
     print(f"ERROR: {err_msg}")
 
-
 def create_account():
     try:
         account['full_name'] = input("Введите Ф.И.О: ")
-        birth_year = int(input("Введите год рождения: "))
-        account['age'] = 2024 - birth_year
+        birth_year = input("Введите год рождения: ")
+        if not birth_year.isdigit():
+            raise ValueError("Год рождения должен быть числом.")
+        account['age'] = 2024 - int(birth_year)
         account['password'] = input("Введите пароль: ")
         print(f"Создан аккаунт: {account['full_name']} {account['age']}")
         print("Аккаунт успешно зарегистрирован!")
-    except Exception as e:
+    except ValueError as e:
         log_error(e)
-
+    except Exception as e:
+        log_error(f"Неизвестная ошибка: {e}")
 
 def deposit_money():
     try:
-        amount = float(input("Введите сумму пополнения: "))
+        amount = input("Введите сумму пополнения: ")
+        amount = float(amount)
         if amount > 0:
             account['balance'] += amount
             print("Счёт успешно пополнен на сумму:", amount)
@@ -28,13 +31,15 @@ def deposit_money():
             print("Сумма должна быть больше нуля.")
     except ValueError:
         log_error("Неверный формат суммы, должно быть число.")
-
+    except Exception as e:
+        log_error(f"Неизвестная ошибка: {e}")
 
 def withdraw_money():
     try:
         check = input("Введите пароль: ")
         if check == account['password']:
-            amount = float(input("Введите сумму для снятия: "))
+            amount = input("Введите сумму для снятия: ")
+            amount = float(amount)
             if amount > account['balance']:
                 print("Недостаточно средств на счету.")
             elif amount <= 0:
@@ -46,27 +51,32 @@ def withdraw_money():
             print("Неверный пароль!")
     except ValueError:
         log_error("Ошибка при вводе суммы.")
-
+    except Exception as e:
+        log_error(f"Неизвестная ошибка: {e}")
 
 def handle_transaction():
     try:
         comment = input("Введите комментарий для транзакции: ")
-        amount = float(input("Введите сумму: "))
+        amount = input("Введите сумму: ")
+        amount = float(amount)
         transaction = {'comment': comment, 'amount': amount}
         account['transactions'].append(transaction)
         print(f"Транзакция добавлена. Комментарий: {comment}, сумма: {amount}")
     except ValueError:
         log_error("Ошибка при вводе данных транзакции.")
-
+    except Exception as e:
+        log_error(f"Неизвестная ошибка: {e}")
 
 def set_treshold():
     try:
-        treshold = float(input("Введите новый лимит транзакций: "))
+        treshold = input("Введите новый лимит транзакций: ")
+        treshold = float(treshold)
         account['treshold'] = treshold
         print(f"Лимит транзакций установлен на: {treshold}")
     except ValueError:
         log_error("Ошибка при установке лимита. Введите число.")
-
+    except Exception as e:
+        log_error(f"Неизвестная ошибка: {e}")
 
 def apply_transactions():
     try:
@@ -82,7 +92,6 @@ def apply_transactions():
     except Exception as e:
         log_error(f"Ошибка при применении транзакций: {e}")
 
-
 def show_transaction_stats():
     try:
         freq = {}
@@ -97,10 +106,10 @@ def show_transaction_stats():
     except Exception as e:
         log_error(f"Ошибка при отображении статистики транзакций: {e}")
 
-
 def filter_by_amount():
     try:
-        filter_amount = float(input("Введите сумму для фильтрации: "))
+        filter_amount = input("Введите сумму для фильтрации: ")
+        filter_amount = float(filter_amount)
         for transaction in account['transactions']:
             if transaction['amount'] >= filter_amount:
                 yield transaction
@@ -109,13 +118,11 @@ def filter_by_amount():
     except Exception as e:
         log_error(f"Ошибка при фильтрации транзакций: {e}")
 
-
 def show_filtered_transactions():
     print("Фильтрация транзакций по заданной сумме:")
     filtered_transactions = filter_by_amount()
     for transaction in filtered_transactions:
         print(f"Транзакция: Комментарий - {transaction['comment']}, Сумма - {transaction['amount']}")
-
 
 def save_to_file():
     try:
@@ -130,8 +137,6 @@ def save_to_file():
         print("Данные аккаунта сохранены.")
     except Exception as e:
         print(f"Ошибка при сохранении данных: {e}")
-
-
 
 def load_from_file():
     try:
@@ -151,14 +156,12 @@ def load_from_file():
     except Exception as e:
         print(f"Ошибка при загрузке данных: {e}")
 
-
-
 def main():
     print("Загрузить ваши данные?" + "\n" + "1. Да" + "\n" + "2. Нет")
-    choice = int(input("Выберите вариант: "))
-    if choice == 1:
+    choice = input("Выберите вариант: ")
+    if choice == "1":
         load_from_file()
-    elif choice == 2:
+    elif choice == "2":
         print("Начните с создания нового аккаунта.")
 
     while True:
@@ -175,7 +178,10 @@ def main():
         print("10. Выйти из программы")
 
         try:
-            cmd = int(input("Выберите номер операции: "))
+            cmd = input("Выберите номер операции: ")
+            if not cmd.isdigit():
+                raise ValueError("Номер операции должен быть числом.")
+            cmd = int(cmd)
             if cmd == 1:
                 create_account()
             elif cmd == 2:
@@ -199,8 +205,10 @@ def main():
                 break
             else:
                 print("Неверный номер операции или аккаунт не создан.")
-        except ValueError:
-            print("Номер операции должен быть числом.")
+        except ValueError as e:
+            log_error(e)
+        except Exception as e:
+            log_error(f"Неизвестная ошибка: {e}")
         save_to_file()
 
 if __name__ == "__main__":
